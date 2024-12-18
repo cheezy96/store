@@ -3,76 +3,43 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Store</title>
+    <title>Document</title>
     <style>
         *, *::before, *::after{
             box-sizing: border-box;
             margin: 0;
             padding: 0;
         }
-        input, button{
+        body{
+            font-family: system-ui;
+        }
+
+        button, input{
             padding: .5em;
+        }
+
+        img{
+            max-width: 150px;
+            aspect-ratio: 1/1;
+            object-fit: contain;
         }
         main{
             min-height: 100vh;
+
             display: grid;
-            place-content: center;
-            grid-template-columns: repeat(4, 200px);
             gap: 10px;
+            place-content: center;
+            grid-template-columns: repeat(4, 250px);
         }
         .product{
             border: 1px solid red;
-
             padding: 1em;
-            display: flex;
-            flex-direction: column;
-
-            > img{
-                aspect-ratio: 1/1;
-            }
+            text-align: center;
         }
 
         dialog{
             margin: auto;
             padding: 1em;
-            text-align: center;
-            img{
-                width: 200px;
-                aspect-ratio: 1/1;
-                object-fit: cover;
-            }
-        }
-
-        #dialogFruit{
-            text-transform: capitalize;
-        }
-
-        @media (width < 933px){
-            main{
-                display: grid;
-                grid-template-columns: repeat(3, 250px);
-                margin: 5rem;
-            }
-
-            img{
-                min-width: 200px;
-                aspect-ratio: 1/1;
-            }
-        }
-
-        @media(width < 780px){
-            main{
-                display: grid;
-                grid-template-columns: repeat(2, 250px);
-                margin: 5rem;
-            }
-        }
-        @media(width < 517px){
-            main{
-                display: grid;
-                grid-template-columns: repeat(1, 250px);
-                margin: 5rem;
-            }
         }
     </style>
 </head>
@@ -80,66 +47,68 @@
     <main>
         
     </main>
-
     <dialog id="dialogID">
-        <img id="dialogImage" src="" alt="">
-        <h2 id="dialogFruit"></h2>
+
+        <h1 id="ghostID" hidden></h1>
+        <h1 id="dialogFruit">hello</h1>
         <h3 id="dialogQty"></h3>
-        <form onsubmit="onSubmit()" method="dialog">
-            <input id="ghostID" type="number" hidden>
-            <input id="dialogAmount" type="number" placeholder="Enter amount">
+        <form method="dialog" onsubmit="minus()">
+            <input id="deductID" type="number" placeholder="How many">
             <input type="submit">
         </form>
     </dialog>
-    
+
     <script>
         let fruits;
-        
+
         async function refresh(){
-            let response = await fetch("http://localhost/store/api/db.php");
-            fruits = await response.json();
+            let response = await fetch("http://localhost/store/api/get-fruits.php");
+            fruits = await response.json();    
             console.log(fruits);
 
             let main = document.querySelector("main");
+            
             main.innerHTML = '';
             for (const fruit of fruits) {
-
-                // if(fruit.qty <= 0 || fruit.qty == 0){
-                //     await fetch(`DELETE FROM fruits WHERE 'fruits'.'id' = ${fruit.id}`);
-                //     console.log("naay zero");
-                // }
-                
                 main.innerHTML += `
-                <div class="product">
-                    <img src="./images/${fruit.image}.png" alt="">
-                    <h3>${fruit.name}</h3>
-                    <h4>Quantity: ${fruit.qty}</h4>
-                    <h4>${fruit.price} / ${fruit.unit}</h4>
-                    <button onclick="openDialog(${fruit.id})">BUY</button>
-                </div>    
-            `;
+                    <div class="product">
+                        <img src="./images/${fruit.image}.png" alt="">
+                        <h2>${fruit.name}</h2>
+                        <h3>Quantity: ${fruit.qty}</h3>
+                        <h4>${fruit.price} / ${fruit.unit}</h4>
+                        <button onclick="buy(${fruit.id})">BUY</button>
+                    </div>
+                `;
             }
         }
 
-        function openDialog(id){
+        function buy(id){
+            deductID.value = '';
+            
             dialogID.showModal();
-            
+
             let currentFruit = fruits.find(fruit => fruit.id == id);
-            ghostID.value = currentFruit.id;
-            
-            dialogImage.src = `http://localhost/store/images/${currentFruit.image}.png`
+            ghostID.innerHTML = currentFruit.id;
             dialogFruit.innerHTML = currentFruit.name;
             dialogQty.innerHTML = 'Quantity: ' + currentFruit.qty;
-            dialogAmount.max = currentFruit.qty;
-            // dialogAmount = 0;
+            deductID.max = currentFruit.qty;
+
+            console.log(currentFruit);
         }
 
-        async function onSubmit(){
-            let id = ghostID.value;
-            let amount = dialogAmount.value;
-            await fetch(`http://localhost/store/api/minus.php?id=${id}&amount=${amount}`);
+        async function minus(){
+            let id = ghostID.innerHTML;
+            let amount = deductID.value;
+            
+            // console.log(amount);
+            await fetch(`http://localhost/store/api/minus-fruit.php?id=${id}&amount=${amount}`);
+            deductID.value = '';
             refresh();
         }
+
+
+
+        
 
         refresh();
     </script>

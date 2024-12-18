@@ -1,6 +1,7 @@
 name,qty,unit,price,image
-apple,50,pc,10,apple
-banana,30,kilo,50,banana
-guava,60,pc,15,guava
-grapes,80,kilo,80,grapes
-orange,100,pc,12,orange
+bayabas,50,pc,10,bayabas
+chico,30,kilo,50,chico
+durian,60,pc,15,durian
+eggplant,80,kilo,80,eggplant
+fuji_apple,100,pc,12,fuji_apple
+grapes,100,pc,14,grapes
